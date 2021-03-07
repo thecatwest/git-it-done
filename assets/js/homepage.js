@@ -1,3 +1,4 @@
+var languageButtonsEl = document.querySelector("#language-buttons");
 var userFormEl = document.querySelector("#user-form");
 var nameInputEl = document.querySelector("#username");
 var repoContainerEl = document.querySelector("#repos-container");
@@ -46,10 +47,9 @@ var displayRepos = function (repos, searchTerm) {
     repoContainerEl.textContent = "No repositories found.";
     return;
   }
-  console.log(repos);
-  console.log(searchTerm);
+ 
   // clear old content
-  repoContainerEl.textContent = "";
+  // repoContainerEl.textContent = "";
   repoSearchTerm.textContent = searchTerm;
   // loop over repos
   for (var i = 0; i < repos.length; i++) {
@@ -91,5 +91,35 @@ var displayRepos = function (repos, searchTerm) {
   }
 };
 
-// add event listener to form
+var getFeaturedRepos = function(language) {
+  // format the github api url
+  var apiUrl = "https://api.github.com/search/repositories?q=" + language + "+is:featured&sort=help-wanted-issues";
+
+  // make a get request to url
+  fetch(apiUrl).then(function(response) {
+    // request was successful
+    if (response.ok) {
+      response.json().then(function(data) {
+        displayRepos(data.items, language);
+      });
+    } else {
+      alert("Error: " + response.statusText);
+    }
+  });
+};
+
+var buttonClickHandler = function(event) {
+  // get the language attribute from the clicked element
+  var language = event.target.getAttribute("data-language");
+
+  if (language) {
+    getFeaturedRepos(language);
+
+    // clear old content
+    repoContainerEl.textContent = "";
+  }
+};
+
+// add event listeners to form and button container
 userFormEl.addEventListener("submit", formSubmitHandler);
+languageButtonsEl.addEventListener("click", buttonClickHandler);
